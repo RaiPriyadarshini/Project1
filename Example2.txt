@@ -1,1 +1,1678 @@
-Hi this is Priyaujtu
+//1**********Listner class
+
+package TestScript;
+
+import java.io.IOException;
+import org.testng.ITestContext;
+import org.testng.ITestListener;
+import org.testng.ITestResult;
+
+import com.aventstack.extentreports.MediaEntityBuilder;
+import com.aventstack.extentreports.Status;
+
+import Base.TestBase;
+
+public class Flight_Check extends TestBase implements ITestListener {
+
+	@Override
+	public void onTestStart(ITestResult result) 
+	{
+				
+				
+	}
+
+	@Override
+	public void onTestSuccess(ITestResult result) 
+	{
+			try 
+			{
+				
+				if(result.getStatus() == ITestResult.SUCCESS)
+				 {
+					 	
+					 	String	screenShotPath = takeScreenshot(driver, "Pass");
+					 	test.log(Status.INFO, "Successful Booking Snapshot Below :", MediaEntityBuilder.createScreenCaptureFromPath(screenShotPath).build());
+					 	System.out.println("********* Passed *********");
+					 	
+					 	
+				 }
+			} 
+			catch (IOException e) 
+			{
+			
+				e.printStackTrace();
+			}
+			 
+	}
+	@Override
+	public void onTestFailure(ITestResult result)
+	{
+		
+		 try
+		 {
+			 
+			 if(result.getStatus() == ITestResult.FAILURE)
+			 { 
+				 	
+				 	String	screenShotPath = takeScreenshot(driver, "Fail");
+				 	test.log(Status.FAIL, result.getThrowable());
+				 	test.log(Status.INFO, "Failed Booking Snapshot Below :", MediaEntityBuilder.createScreenCaptureFromPath(screenShotPath).build());
+				 	System.out.println("********* Failed *********");
+				 	
+			 }
+
+		
+		 }
+		 catch(Exception e)
+		 {
+			 e.getMessage();
+		 }
+	}
+
+	@Override
+	public void onTestSkipped(ITestResult result) {
+		
+		 try
+		 {
+			 
+			 if(result.getStatus() == ITestResult.SKIP)
+			 { 
+
+				 	String	screenShotPath = takeScreenshot(driver, "SKIP");
+				 	test.log(Status.SKIP, result.getThrowable());
+				 	test.log(Status.INFO, "Skipped Booking Snapshot Below :", MediaEntityBuilder.createScreenCaptureFromPath(screenShotPath).build());
+				 	System.out.println("********* Skipped *********");
+			 }
+
+		
+		 }
+		 catch(Exception e)
+		 {
+			 e.getMessage();
+		 }
+	}
+
+	@Override
+	public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
+		
+		 
+	}
+	
+	public void onStart(ITestContext context) {
+		// TODO Auto-generated method stub
+		try {
+			init();
+			userLogin();
+		} catch (IOException e) {
+
+			e.printStackTrace();
+		}
+
+	}
+
+	
+
+	@Override
+	public void onFinish(ITestContext context)
+	{
+	
+		
+	}
+
+}
+
+
+
+
+//2**********TestScript
+
+
+//****8i)
+
+package TestScript;
+
+import java.util.List;
+
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Reporter;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+import com.aventstack.extentreports.MediaEntityBuilder;
+import com.aventstack.extentreports.Status;
+import Base.TestBase;
+import Utilities.ExcelRead;
+
+public class Flight extends Flight_Check {
+
+	String interResultPrice;
+	ExcelRead reader;
+	String domprice;
+	WebDriverWait Expwait;
+
+	@DataProvider
+	public Object[][] getexceldata() throws Exception {
+
+		reader = new ExcelRead(System.getProperty("user.dir") + "\\excelFiles\\flight.xlsx");
+
+		int row = reader.getrowCount("Sheet1");
+
+		int column = reader.getColumnCount("Sheet1");
+
+		Object[][] data = new Object[row][column];
+
+		for (int i = 0; i < row; i++) {
+			for (int j = 0; j < column; j++) {
+				data[i][j] = reader.getData("Sheet1", i + 1, j);
+			}
+		}
+		return data;
+	}
+
+	@Test(dataProvider = "getexceldata")
+	public void flighttest(String trip_type, String departure_City, String departureCity_Autosuggestion,
+			String destination_City, String destinationCity_Autosuggestion, String starttripdate, String returnTripDate,
+			String num_Of_Adult, String num_Of_Child, String num_Of_Infant, String classtypeValue,
+			String prefrdAirlineList, String clientName, String clientSurname, String clientEmail, String mobile_no,
+			String A_dob, String adult_passport_1, String a_Exp_Date_value, String card, String card_type,
+			String card_num, String card_name, String cvv_num, String paymntExpDat, String AdtTitle, String adultName,
+			String Adult_Last_Name, String AdtDate, String AdtMonth, String AdtYear, String Adult_Passport,
+			String AdtExpDate, String AdtExpMonth, String AdtExpYear, String ChdTitle, String Chd_First_Name,
+			String Chd_Last_Name, String ChdDate, String ChdMonth, String ChdYear, String Chd_Passport,
+			String ChdExpDate, String ChdExpMonth, String ChdExpYear, String InfTitle, String Inf_First_Name,
+			String Inf_Last_Name, String InfDate, String InfMonth, String InfYear, String InfTravelWith,
+			String Inf_Passport, String InfExpDate, String InfExpMonth, String InfExpYear) throws Exception {
+
+		test = report.createTest("Flight");
+
+		// Alert handle
+		driver.manage().timeouts().pageLoadTimeout(2000, TimeUnit.SECONDS);
+		// List<WebElement> PopUp =
+		// driver.findElements(By.id("btnClosePopUpNotification"));
+		//
+		// if(PopUp.size() > 0)
+		// {
+		// getWebElement("Crossbar").click();
+		// }
+
+		// All Balance
+		test.log(Status.INFO, "Avalabe credit limit :- " + getCreditLimit().toString());
+		test.log(Status.INFO, "Available wallet balance :-  " + getWalletBalance().toString());
+		test.log(Status.INFO, "Available outstanding balance :-  " + getOutstandingBalance().toString());
+		test.log(Status.INFO, "Available total credit limit balance :-  " + getAvailabeCreditLimit().toString());
+
+		if (trip_type.equalsIgnoreCase("Round Trip")) {
+			getWebElement("roundtrip").click();
+			test.log(Status.INFO, "Trip type is round trip");
+		} else if (trip_type.equalsIgnoreCase("One Way")) {
+			getWebElement("oneWay").click();
+			test.log(Status.INFO, "Trip type is One Way");
+		} else if (trip_type.equalsIgnoreCase("Multi City")) {
+			getWebElement("multiCity").click();
+			test.log(Status.INFO, "trip type is Multi City");
+		}
+
+		System.out.println("Execution start");
+
+		// Select source & desti for round and one way
+		if (trip_type.equalsIgnoreCase("Round Trip") || trip_type.equalsIgnoreCase("One Way")) {
+
+			TestBase.listofautosuggestion(By.id("FlightSearch_txtDepartureCity"), departure_City,
+					By.xpath("//div[@id='FlightdivDepartureCity']/p"), departureCity_Autosuggestion);
+
+			// div[@id="FlightdivDepartureCity"]/p
+			Thread.sleep(3000);
+			TestBase.listofautosuggestion(By.id("FlightSearch_txtDestinationCity"), destination_City,
+					By.xpath("//div[@id='FlightdivDestinationCity']/p"), destinationCity_Autosuggestion);
+		} else if (trip_type.equalsIgnoreCase("Multi City")) {
+
+			TestBase.listofautosuggestion(By.xpath("//input[@id='FlightSearch_MtxtDepartureCity1']"), departure_City,
+					By.xpath("//div[@id='MFlightdivDepartureCity1']/p"), departureCity_Autosuggestion);
+
+			TestBase.listofautosuggestion(By.xpath("//input[@id='FlightSearch_MtxtDestinationCity1']"),
+					destination_City, By.xpath("//div[@id='MFlightdivDestinationCity1']/p"),
+					destinationCity_Autosuggestion);
+
+			TestBase.selectCalDate("multical1", starttripdate);
+			// second
+			driver.findElement(By.id("FlightSearch_MtxtDepartureCity2")).click();
+			Thread.sleep(2000);
+			TestBase.listofautosuggestion(By.xpath("//input[@id='FlightSearch_MtxtDestinationCity2']"), departure_City,
+					By.xpath("//div[@id='MFlightdivDestinationCity2']/p"), departureCity_Autosuggestion);
+
+			TestBase.selectCalDate("multical2", starttripdate);
+
+		}
+		Reporter.log("Selected trip");
+
+		// Select date for round and one way
+		if (trip_type.equalsIgnoreCase("Round Trip")) {
+			Thread.sleep(2000);
+			TestBase.selectCalDate("OpenDate", starttripdate);
+			Thread.sleep(2000);
+			TestBase.selectCalDate("returnDate", returnTripDate);
+
+		} else if (trip_type.equalsIgnoreCase("One Way")) {
+			TestBase.selectCalDate("OpenDate", starttripdate);
+		}
+
+		// For Multicity
+
+		test.log(Status.INFO, "Search Page");
+		// Actions action = new Actions(driver);
+
+		// TestBase.selectCalDate("OpenDate", starttripdate);
+		// Date selection
+
+		getWebElement("travellers").click();
+
+		TestBase.selectValue(num_Of_Adult, getWebElement("FlightSearch_Adult"));
+		TestBase.selectValue(num_Of_Child, getWebElement("FlightSearch_Children"));
+		TestBase.selectValue(num_Of_Infant, getWebElement("FlightSearch_Infant"));
+
+		test.log(Status.INFO, "Num_Of_Adult : - " + num_Of_Adult + " , Num_Of_Child  :- " + num_Of_Child
+				+ " , Num_Of_Infant  :-" + num_Of_Infant);
+
+		TestBase.selectValue(classtypeValue, getWebElement("classType"));
+
+		// Prefered airlines
+		//
+		// if (trip_type.equalsIgnoreCase("Round Trip") ||
+		// trip_type.equalsIgnoreCase("One Way")) {
+		// // getWebElement("preferedAirlines").click();
+		//
+		// TestBase.PreferedAirline("preferedAirlines", prefrdAirlineList,
+		// "preferfedAirText");
+		//
+		// }
+
+		/// screen short for search page.
+
+		String searchpage = takeScreenshot(driver, "Search Page");
+		test.log(Status.INFO, "Screenshot for Search Page",
+				MediaEntityBuilder.createScreenCaptureFromPath(searchpage).build());
+
+		Thread.sleep(2000);
+
+		if (trip_type.equalsIgnoreCase("Multi City")) {
+			TestBase.getWebElement("multisearchbutn").click();
+		} else {
+			TestBase.getWebElement("searchbutn").click();
+		}
+		Thread.sleep(10000);
+
+		// WebElement e = driver.findElement(By.xpath("//p[text()='Oops! Seems
+		// like no flight journeys are available for the selected serach
+		// criteria.']"));
+		// if (driver.findElement(By.xpath("//p[text()='Oops! Seems like no
+		// flight journeys are available for the selected serach
+		// criteria.']")).isDisplayed()) {
+		// TestBase.getWebElement("modifySearch").click();
+		// TestBase.getWebElement("searchbutn_modify").click();
+		// }
+
+		Thread.sleep(15000);
+
+		driver.manage().timeouts().pageLoadTimeout(2000, TimeUnit.SECONDS);
+		// ************************ Validation *********************************
+
+		// take screenshot for result page
+
+		String resultpage = takeScreenshot(driver, "Resultpage");
+		test.log(Status.INFO, "Screenshot for Resultpage",
+				MediaEntityBuilder.createScreenCaptureFromPath(resultpage).build());
+
+		Thread.sleep(2000);
+		List<WebElement> str1 = driver.findElements(By.xpath("//a[@id='a_airline']"));
+		int intdom = str1.size();
+
+		String url = driver.getCurrentUrl();
+		System.out.println("url  ***********      " + url);
+		// //************************************************
+		// System.out.println("*********************************intdon -
+		// "+intdom);
+		if (intdom == 1) {
+			// To check each tab of result page.
+
+			/*
+			 * getWebElement("Flightitenary").click(); Expwait = new
+			 * WebDriverWait(driver, 60);
+			 * Expwait.until(ExpectedConditions.visibilityOfElementLocated(By.
+			 * xpath("(//span[text()='Send Email'])[1]")));
+			 * driver.findElement(By.xpath("(//span[text()='Send Email'])[1]")).
+			 * click(); getWebElement("flightitEmlBox").clear();
+			 * getWebElement("flightitEmlBox").sendKeys(
+			 * "priyadarshini.singh@quadlabs.com"); Thread.sleep(2000);
+			 * getWebElement("flightItsendmail").click();
+			 * System.out.println("After send mail click"); WebDriverWait wait =
+			 * new WebDriverWait(driver, 60); Alert alert =
+			 * wait.until(ExpectedConditions.alertIsPresent()); alert.accept();
+			 * 
+			 * Thread.sleep(3000); getWebElement("flgtItmailclose").click();
+			 * Thread.sleep(5000);
+			 * 
+			 * Expwait.until(ExpectedConditions.invisibilityOfElementLocated(By.
+			 * xpath("//button[text()='Close']")));
+			 * System.out.println("be fore fare breakup");
+			 * 
+			 * driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+			 * getWebElement("Flifarebreakup").click();
+			 * driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+			 * 
+			 * Expwait.until(
+			 * ExpectedConditions.visibilityOfElementLocated(By.xpath(
+			 * "(//div[@class='fare_tb']/label)[1]")));
+			 * 
+			 * String fareBrkCustmPrice =
+			 * getWebElement("fareBrkCustmPrice").getText();
+			 * test.log(Status.INFO, "Cost of customer at result page : - " +
+			 * fareBrkCustmPrice);
+			 * System.out.println("fareBrkCustmPrice                " +
+			 * fareBrkCustmPrice); Thread.sleep(2000);
+			 * 
+			 * String flightsubantPrice =
+			 * getWebElement("flightsubantPrice").getText();
+			 * System.out.println("flightsubantPrice                " +
+			 * flightsubantPrice); test.log(Status.INFO,
+			 * "Cost of Subagent at result page : - " + flightsubantPrice);
+			 * 
+			 * System.out.println("Aftr farebk");
+			 * 
+			 * getWebElement("FlifareRule").click();
+			 * Expwait.until(ExpectedConditions .visibilityOfElementLocated(By.
+			 * xpath("(//h4[@class='fare-rules-hdng ng-binding'])[1]")));
+			 * Thread.sleep(3000); System.out.println("After fare rul");
+			 * 
+			 * driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+			 * 
+			 * getWebElement("baggeclik").click();
+			 * driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+			 * Expwait.until(
+			 * ExpectedConditions.visibilityOfElementLocated(By.xpath(
+			 * "(//span[@class='depart-bag-img'])[1]")));
+			 * System.out.println("After Bag Exp"); //
+			 * getWebElement("Flipenalty").click(); Thread.sleep(3000);
+			 * getWebElement("FsendQuote").click();
+			 * System.out.println("After FsendQuote");
+			 * Expwait.until(ExpectedConditions.visibilityOfElementLocated(By.
+			 * xpath("//a[@id='ASendQuote']")));
+			 * 
+			 * getWebElement("FsendquoteFare").click();
+			 * Expwait.until(ExpectedConditions.visibilityOfElementLocated(By.id
+			 * ("QTitle")));
+			 * 
+			 * getWebElement("FQtitle").sendKeys("Miss");
+			 * 
+			 * getWebElement("Ffname").sendKeys("Priya");
+			 * 
+			 * getWebElement("Flname").sendKeys("Rai");
+			 * getWebElement("Fqemail").clear();
+			 * getWebElement("Fqemail").sendKeys(
+			 * "priyadarshini.singh@quadlabs.com");
+			 * getWebElement("Fqtextmark").sendKeys("Test remark of quotes");
+			 * getWebElement("Fwithoutcost").click();
+			 * getWebElement("Fsendfarerule").click();
+			 * getWebElement("Fsendemail").click(); Thread.sleep(3000);
+			 * getWebElement("fbclose1").click(); Thread.sleep(3000);
+			 */
+			// getWebElement("nonrefund").click();
+
+		}
+		//
+
+		// *********************************************
+
+		if (intdom == 2) {
+			System.out.println("dom111111111111111 " + intdom);
+			System.out.println("Inside dom");
+			String Price = driver.findElement(By.xpath("//span[@id='TotalPrice']")).getText();
+			System.out.println("Dom price " + Price);
+			String[] DomtotalBalnceAtA = Price.split(" ");
+			String DomtotalBalnceAtS = DomtotalBalnceAtA[1];
+			System.out.println("Proua");
+			domprice = DomtotalBalnceAtS.replace(",", "");
+			double priced = Double.parseDouble(domprice);
+			System.out.println("dom8pppppppppppppppppppppppppppp" + priced);
+
+			WebElement domesticE = driver.findElement(By.xpath("//*[@id='btnProcess']"));
+			Thread.sleep(4000);
+			domesticE.click();
+
+		} else if (intdom == 1) {
+			// System.out.println("Int222222222222222222222 " + intdom);
+
+			System.out.println(
+					"interPriceResult       ##########################           " + getPriceWitoutSpc("intpricresul"));
+
+			interResultPrice = Double.toString(getPriceWitoutSpc("intpricresul"));
+
+			WebElement intenationalE = driver.findElement(By.xpath("(//input[starts-with(@id,'Anchor_')])[1]"));
+			Thread.sleep(4000);
+
+			// new WebDriverWait(driver,
+			// 20).until(ExpectedConditions.elementToBeClickable(By.xpath("//input[starts-with(@id,'Anchor_')]
+			// and starts-with(@ng-class,'proceedToBook')]"))).click();
+
+			// JavascriptExecutor tripDays2 = (JavascriptExecutor) driver;
+			// WebElement departdate2
+			// =driver.findElement(By.xpath("(//a[starts-with(@id,'fare-rule-link')])[1]"));
+			// tripDays2.executeScript("arguments[0].click();", departdate2);
+			intenationalE.click();
+
+		}
+		// Change Selection
+		// if (TestBase.getWebElement("changeSelection").isDisplayed()) {
+		//
+		// TestBase.getWebElement("changeSelection").click();
+		//
+		// driver.manage().timeouts().pageLoadTimeout(6000, TimeUnit.SECONDS);
+		//
+		// if (intdom == 2) {
+		// System.out.println("Chaneg domestic " + intdom);
+		// Thread.sleep(2000);
+		// WebElement domesticE =
+		// driver.findElement(By.xpath("(//*[@id='btnProcess'])[1]"));
+		// Thread.sleep(2000);
+		// domesticE.click();
+		// } else if (intdom == 1) {
+		// System.out.println("Chaneg International " + intdom);
+		// WebElement intenationalE =
+		// driver.findElement(By.xpath("(//input[starts-with(@id,'Anchor_')])[1]"));
+		// intenationalE.click();
+		// }
+		// }
+
+		String CheckoutPriceWithTax = Double.toString(getPriceWitoutSpc("resultcheckout"));
+		System.out.println("CheckoutPriceWithTax  " + CheckoutPriceWithTax);
+		String amountPayable = Double.toString(getPriceWitoutSpc("fpayableAmount"));
+		System.out.println("amountPayable   " + amountPayable);
+		Double checkoutPriceDec = getPriceWitoutSpc("resultcheckout");
+		System.out.println("checkoutPriceDec    " + checkoutPriceDec);
+		Double amountPayableDec = getPriceWitoutSpc("fpayableAmount");
+		System.out.println("amountPayableDec   " + amountPayableDec);
+		Double convncfeeDec = getPriceWitoutSpc("convinience_Fee");
+		System.out.println("convncfeeDec   " + convncfeeDec);
+		Double totalpricewithoutConvFeeDec = amountPayableDec - convncfeeDec;
+		System.out.println("totalpricewithoutConvFeeDec     " + totalpricewithoutConvFeeDec);
+		String finalPrice = Double.toString(totalpricewithoutConvFeeDec);
+		System.out.println("finalPrice   " + finalPrice);
+		String convinience_fee = Double.toString(getPriceWitoutSpc("convinience_Fee"));
+		System.out.println("convinience_fee  " + convinience_fee);
+
+		// inside if else
+		if (intdom == 2) {
+			CompareFareValue(domprice, finalPrice, "Result page and checkout page payable amount are same");
+		} else {
+			CompareFareValue(interResultPrice, finalPrice, "Result page and checkout page payable amount are same");
+		}
+
+		CompareFareValue(CheckoutPriceWithTax, finalPrice, "CheckoutPriceWithTax and checkout amountPayable are same");
+		System.out.println("Before Miss");
+	TestBase.selectByVisibleTxt("titleId", "Mr");
+		System.out.println("After miss    ");
+		Thread.sleep(1000);
+		
+		getWebElement("client_name").sendKeys(clientName);
+		
+		getWebElement("client_surname").sendKeys(clientSurname);
+		getWebElement("client_email").sendKeys(clientEmail);
+
+		getWebElement("mobile_number").sendKeys(mobile_no);
+
+		// fill adult detail
+		TestBase.selectDate(A_dob, "adult_dob_day", "adult_dob_mon", "adult_dob_yr");
+		// password
+
+		if (intdom == 1) {
+			getWebElement("adult_passport").sendKeys(adult_passport_1);
+
+			TestBase.selectDate(a_Exp_Date_value, "a_expiry_date_dd", "a_expiry_date_mm", "a_expiry_date_yy");
+		}
+
+		int AdultValue = Integer.parseInt(num_Of_Adult);
+		if (AdultValue > 0) {
+			TestBase.AdultData(num_Of_Adult, AdtTitle, adultName, Adult_Last_Name, AdtDate, AdtMonth, AdtYear,
+					Adult_Passport, AdtExpDate, AdtExpMonth, AdtExpYear, intdom);
+		}
+		int ChdValue = Integer.parseInt(num_Of_Child);
+		if (ChdValue > 0) {
+			TestBase.ChdData(num_Of_Child, ChdTitle, Chd_First_Name, Chd_Last_Name, ChdDate, ChdMonth, ChdYear,
+					Chd_Passport, ChdExpDate, ChdExpMonth, ChdExpYear, intdom);
+		}
+		int Infant = Integer.parseInt(num_Of_Infant);
+		if (Infant > 0) {
+			TestBase.InfData(num_Of_Infant, InfTitle, Inf_First_Name, Inf_Last_Name, InfDate, InfMonth, InfYear,
+					InfTravelWith, Inf_Passport, InfExpDate, InfExpMonth, InfExpYear, intdom);
+		}
+
+		if (card.equalsIgnoreCase("Credit Card")) {
+			getWebElement("credit_card").click();
+
+			if (card_type.equalsIgnoreCase("Master Card")) {
+				TestBase.selectByVisibleTxt("select_card", "Master Card");
+			} else {
+				TestBase.selectByVisibleTxt("select_card", "Visa");
+			}
+
+			getWebElement("card_number").sendKeys(card_num);
+			getWebElement("cardHolderName").sendKeys(card_name);
+			getWebElement("securityCode").sendKeys(cvv_num);
+
+			TestBase.selectPaymentExpDate(paymntExpDat, "cardExpDatmm", "cardExpyy");
+		}
+
+		/////////// debit card
+		if (card.equalsIgnoreCase("Debit Card")) {
+
+			getWebElement("debit_card").click();
+
+			if (card_type.equalsIgnoreCase("Master Card")) {
+
+				TestBase.selectByVisibleTxt("select_card", "Master Card");
+			} else {
+				TestBase.selectByVisibleTxt("select_card", "Visa");
+			}
+
+			getWebElement("card_number").sendKeys(card_num);
+			getWebElement("cardHolderName").sendKeys(card_name);
+			getWebElement("securityCode").sendKeys(cvv_num);
+
+			TestBase.selectPaymentExpDate(paymntExpDat, "cardExpDatmm", "cardExpyy");
+		}
+		if (card.equalsIgnoreCase("Credit Limit")) {
+
+			getWebElement("credit_limit").click();
+		}
+		getWebElement("terms_conditn").click();
+		// take screenshot for checkout page
+		String checkoutpage = takeScreenshot(driver, "Checkoutpage");
+		test.log(Status.INFO, "Screenshot for Checkoutpage",
+				MediaEntityBuilder.createScreenCaptureFromPath(checkoutpage).build());
+
+		// getWebElement("confirm_butn").click();
+		driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+
+		// take screenshot for Checkout page
+
+		String confirmpage = takeScreenshot(driver, "confirmpage");
+		test.log(Status.INFO, "Screenshot for Confirm Page",
+				MediaEntityBuilder.createScreenCaptureFromPath(confirmpage).build());
+
+		if (TestBase.getWebElement("changeSelection").isDisplayed()) {
+
+			Thread.sleep(3000);
+			getWebElement("fsendEnquiry").click();
+
+		} else {
+			Thread.sleep(3000);
+			getWebElement("confirm_butn").click();
+
+		}
+
+		driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+		// Confirm page
+		// System.out.println("Befor Screenshot");
+		// String ConfirmPage = takeScreenshot(driver, "ConfirmPage");
+		// test.log(Status.INFO, "Screenshot for Confirm page",
+		// MediaEntityBuilder.createScreenCaptureFromPath(ConfirmPage).build());
+
+		System.out.println("grand total  before   ");
+		String grandtotalConfrmPg = getWebElement("confirmPgGrandTotal").getText();
+		// System.out.println("grand total after "+grandtotalConfrmPg );
+
+		// Confirm page
+
+		System.out.println("Open booking befor");
+
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		// js.executeScript("window.scrollBy(0,1000)");
+
+		js.executeScript("scroll(0, 1000);");
+		// js.executeScript("arguments[0].scrollIntoView();",
+		// getWebElement("openbooking"));
+
+		getWebElement("openbooking").click();
+
+		// Booking card
+		driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+
+		getWebElement("openpaymentDetail").click();
+		Thread.sleep(3000);
+
+		//////////// B2B payment-payment done by customer to B2B
+		String customerPayToSubagent = driver.findElement(By.xpath("//span[@id='lblB2bTotAmtPay']")).getText();
+		String[] customerPayToSubagentA = customerPayToSubagent.split(" ");
+		String customerPayToSubagentS = customerPayToSubagentA[0];
+		String customerPayToSubagentM = customerPayToSubagentS.replace(",", "");
+		Double customerPayToSubagentD = Double.parseDouble(customerPayToSubagentM);
+
+		System.out.println("customerPayToSubagentD +++++++++++++++  " + customerPayToSubagentD);
+
+		///////////////// MO payment-payment done by b2b or customer to MO
+		String customerPayOrSubagentPayToMO = driver.findElement(By.xpath("//span[@id='lblTotAmtPay']")).getText();
+		String[] customerPayOrSubagentPayToMOA = customerPayOrSubagentPayToMO.split(" ");
+		String customerPayOrSubagentPayToMOS = customerPayOrSubagentPayToMOA[0];
+		String customerPayOrSubagentPayToMOT = customerPayOrSubagentPayToMOS.replace(",", "");
+		Double customerPayOrSubagentPayToMOD = Double.parseDouble(customerPayOrSubagentPayToMOT);
+		System.out.println("customerPayOrSubagentPayToMOD +++++++++++++++  " + customerPayOrSubagentPayToMOD);
+
+		CompareFareValue(amountPayable, customerPayOrSubagentPayToMOT,
+				"amountPayable and customerPayOrSubagentPayToMO are same");
+
+		// String paymentMode = getWebElement("paymentMode").getText();
+		// System.out.println("paymentMode " + paymentMode);
+		getWebElement("dashboard").click();
+	}
+
+	@AfterMethod
+	public static void afterMetod() {
+		test.getExtent().flush();
+	}
+
+	@AfterSuite
+	public static void method() throws Exception {
+		System.out.println("Gret credit limit from dashboar################" + getCreditLimit());
+		System.out.println("GetWallet Balanc  from dashboar################   " + getWalletBalance());
+		System.out.println("dashboardOutstandingBaln        from dashboar################" + getOutstandingBalance());
+		System.out
+				.println("dashboardAvalableCreditLimitBal    from dashboar################" + getAvailabeCreditLimit());
+
+	}
+
+}
+
+//*******ii)
+
+//3***********Base
+
+package Base;
+
+import java.io.File;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.asserts.SoftAssert;
+
+import com.aventstack.extentreports.reporter.ExtentHtmlReporter;
+import com.aventstack.extentreports.reporter.ExtentKlovReporter;
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.Status;
+
+import Utilities.BrowserLaunch;
+
+public class TestBase {
+	public static Properties properties;
+	public static FileInputStream fis;
+	public static WebDriver driver;
+	public static File file;
+	public static ExtentReports report = new ExtentReports();
+	public static ExtentKlovReporter klovReport = new ExtentKlovReporter();
+	public static ExtentTest test;
+	public static WebDriverWait wait;
+	public static ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter(
+			"D:\\His_Automation\\B2B\\HtmlReport\\Report.html");
+	public static SoftAssert softassert = new SoftAssert();
+
+	public static void init() throws IOException {
+		properties = new Properties();
+		file = new File(System.getProperty("user.dir") + "\\propertiesFile\\browser.properties");
+		fis = new FileInputStream(file);
+		properties.load(fis);
+
+		file = new File(System.getProperty("user.dir") + "\\propertiesFile\\Login.properties");
+		fis = new FileInputStream(file);
+		properties.load(fis);
+
+		file = new File(System.getProperty("user.dir") + "\\propertiesFile\\flight.properties");
+		fis = new FileInputStream(file);
+		properties.load(fis);
+
+		file = new File(System.getProperty("user.dir") + "\\propertiesFile\\car.properties");
+		fis = new FileInputStream(file);
+		properties.load(fis);
+
+		file = new File(System.getProperty("user.dir") + "\\propertiesFile\\sightseen.properties");
+		fis = new FileInputStream(file);
+		properties.load(fis);
+
+		file = new File(System.getProperty("user.dir") + "\\propertiesFile\\Hotel.properties");
+		fis = new FileInputStream(file);
+		properties.load(fis);
+		file = new File(System.getProperty("user.dir") + "\\propertiesFile\\b2bsetting.properties");
+		fis = new FileInputStream(file);
+		properties.load(fis);
+		file = new File(System.getProperty("user.dir") + "\\propertiesFile\\b2b_setting_suplr_rule.properties");
+		fis = new FileInputStream(file);
+		properties.load(fis);
+		
+		file = new File(System.getProperty("user.dir") + "\\propertiesFile\\b2bSeting_manageCredential_SuplierInstallationRule.properties");
+		fis = new FileInputStream(file);
+		properties.load(fis);
+		file = new File(System.getProperty("user.dir") + "\\propertiesFile\\b2b_setting_suplr_pg_management.properties");
+		fis = new FileInputStream(file);
+		properties.load(fis);
+		
+		driver = BrowserLaunch.browser(properties.getProperty("chromedriver"));
+		impliwait(10);
+	
+		driver.get(properties.getProperty("url"));
+		// driver.get("http://preproduction/b2bdashboard");
+
+		klovReport.loadConfig("D:\\His_Automation\\B2B\\lib\\application.properties");
+		klovReport.initMongoDbConnection("localhost", 27017);
+		klovReport.setProjectName("QlB2B");
+		klovReport.setReportName("Staging Server");
+		klovReport.initKlovServerConnection("http://localhost");
+		htmlReporter.config().enableTimeline(true);
+		htmlReporter.config().setAutoCreateRelativePathMedia(true);
+		report.attachReporter(klovReport, htmlReporter);
+
+		file = new File(System.getProperty("user.dir") + "\\excelFiles\\flight.xlsx");
+
+		file = new File(System.getProperty("user.dir") + "\\excelFiles\\hotel.xlsx");
+
+		file = new File(System.getProperty("user.dir") + "\\excelFiles\\Car.xlsx");
+
+		file = new File(System.getProperty("user.dir") + "\\excelFiles\\SightSeen.xlsx");
+		
+		file = new File(System.getProperty("user.dir") + "\\excelFiles\\supplier_rule.xlsx");
+
+		file = new File(System.getProperty("user.dir") + "\\excelFiles\\settingB2B.xlsx");
+		
+		file = new File(System.getProperty("user.dir") + "\\excelFiles\\B2BSetting_MAnagCre_Supp_pagmanagemnt.xlsx");
+	}
+
+	public static WebElement getLocator(String locator) throws Exception {
+		
+		String locatorType = locator.split(":")[0];
+		String locatorValue = locator.split(":")[1];
+
+		if (locatorType.toLowerCase().equalsIgnoreCase("xpath"))
+			return driver.findElement(By.xpath(locatorValue));
+		else if (locatorType.toLowerCase().equalsIgnoreCase("id"))
+			return driver.findElement(By.id(locatorValue));
+		else if (locatorType.toLowerCase().equalsIgnoreCase("class"))
+			return driver.findElement(By.className(locatorValue));
+		else if (locatorType.toLowerCase().equalsIgnoreCase("tag"))
+			return driver.findElement(By.tagName(locatorValue));
+		else if (locatorType.toLowerCase().equalsIgnoreCase("link"))
+			return driver.findElement(By.linkText(locatorValue));
+		else if (locatorType.toLowerCase().equalsIgnoreCase("css"))
+			return driver.findElement(By.cssSelector(locatorValue));
+		else if (locatorType.toLowerCase().equalsIgnoreCase("name"))
+			return driver.findElement(By.name(locatorValue));
+		else
+			throw new Exception("Unknown Locator Type" + locatorType);
+
+	}
+
+	// ** This Function returns the locators from the Web Application ****
+
+	public static WebElement getWebElement(String locator) throws Exception {
+		return getLocator(properties.getProperty(locator));
+	}
+
+	public static List<WebElement> listofautosuggestion(By deptCityCode_lctr, String deptCityCode,
+			By suggestionTxt_lctr, String suggestionTxt) throws InterruptedException {
+
+		driver.findElement(deptCityCode_lctr).sendKeys(deptCityCode);
+
+		driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
+
+		List<WebElement> autosuggestions = driver.findElements(suggestionTxt_lctr);
+		for (WebElement autosuggestion : autosuggestions) {
+			if (autosuggestion.getText().equalsIgnoreCase(suggestionTxt)) {
+				driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
+			
+				autosuggestion.click();
+				break;
+			} else {
+				
+			}
+		}
+
+		return autosuggestions;
+	} 
+
+	// get credit limit
+
+	public static Double getCreditLimit() throws Exception {
+
+		String creditLimitBalnc = TestBase.getWebElement("creditLimitvalue").getText();
+
+		String[] creditA = creditLimitBalnc.split(" ");
+
+		String CreditLimitString = creditA[1];
+		String CreditLimit = CreditLimitString.replace(",", "");
+		double dashboardCreditLimit = Double.parseDouble(CreditLimit);
+		// System.out.println("DashboardCredit Limit " + dashboardCreditLimit);
+		return dashboardCreditLimit;
+	}
+
+	public static Double getWalletBalance() throws Exception {
+		String WaletBalnc = TestBase.getWebElement("WalletBalance").getText();
+		String[] waletbalncA = WaletBalnc.trim().split(" ");
+
+		String WalletBalncS = waletbalncA[1];
+		String WalletBancP = WalletBalncS.replace(",", "");
+		double dashboardWaltBalnc = Double.parseDouble(WalletBancP);
+		// System.out.println("dashboardWaltBalnc " + dashboardWaltBalnc);
+		return dashboardWaltBalnc;
+	}
+
+	public static double getPriceWitoutSpc(String WebElementxpath) throws Exception {
+		String Price = TestBase.getWebElement(WebElementxpath).getText();
+
+		String prics = Price.trim().replace(",", "");
+
+		double priced = Double.parseDouble(prics);
+
+		return priced;
+	}
+
+	public static double getPriceWithSpc(String WebElementxpath) throws Exception {
+		 String Pricec = TestBase.getWebElement(WebElementxpath).getText();
+		String[] PriceA = Pricec.split(" ");
+		// System.out.println("PriceA***************"+PriceA);
+		String PriceS = PriceA[1];
+		// System.out.println("PriceS***************"+PriceS);
+		 String PriceP = PriceS.replace(",","");
+		// System.out.println("PriceA***************"+PriceA);
+		 double PriceAll = Double.parseDouble(PriceP);
+		// System.out.println("PriceA***************"+PriceA);
+		// // System.out.println("dashboardWaltBalnc " + dashboardWaltBalnc);
+	//	String totalPriceAtChekOt = TestBase.getWebElement("//span[@id='TotalPrice']").getText();
+//		String totalPriceAtChekOt = TestBase.getWebElement(WebElementxpath).getText();
+//		String totalPriceAtChekOt1 = totalPriceAtChekOt.replace(",", "");
+//	
+//		Double totalPriceAtChekOut = Double.parseDouble(totalPriceAtChekOt1);
+ 
+		return PriceAll;
+	}
+	public static double getPriceWithSpcAftrCurrncy(String WebElementxpath) throws Exception {
+		 String Pricec = TestBase.getWebElement(WebElementxpath).getText();
+		String[] PriceA = Pricec.split(" ");
+		// System.out.println("PriceA***************"+PriceA);
+		String PriceS = PriceA[0];
+		// System.out.println("PriceS***************"+PriceS);
+		 String PriceP = PriceS.replace(",","");
+		// System.out.println("PriceA***************"+PriceA);
+		 double PriceAll = Double.parseDouble(PriceP);
+		// System.out.println("PriceA***************"+PriceA);
+		// // System.out.println("dashboardWaltBalnc " + dashboardWaltBalnc);
+	//	String totalPriceAtChekOt = TestBase.getWebElement("//span[@id='TotalPrice']").getText();
+//		String totalPriceAtChekOt = TestBase.getWebElement(WebElementxpath).getText();
+//		String totalPriceAtChekOt1 = totalPriceAtChekOt.replace(",", "");
+//	
+//		Double totalPriceAtChekOut = Double.parseDouble(totalPriceAtChekOt1);
+
+		return PriceAll;
+	}
+
+	public static Double getOutstandingBalance() throws Exception {
+
+		String OutstandingBalnc = TestBase.getWebElement("OutstandingBalance").getText();
+
+		String[] OutstandingBalncA = OutstandingBalnc.split(" ");
+		String OutstandingBalnS = OutstandingBalncA[1];
+		String OutstandingBalnP = OutstandingBalnS.replace(",", "");
+		double dashboardOutstandingBaln = Double.parseDouble(OutstandingBalnP);
+		// System.out.println("dashboardOutstandingBaln " +
+		// dashboardOutstandingBaln);
+		return dashboardOutstandingBaln;
+	}
+
+	public static Double getAvailabeCreditLimit() throws Exception {
+
+		String AvalableCreditLimitBal = TestBase.getWebElement("AvalableCreditLimit").getText();
+
+		String[] AvalableCreditLimitBalA = AvalableCreditLimitBal.split(" ");
+		String AvalableCreditLimitBalS = AvalableCreditLimitBalA[1];
+		String AvalableCreditLimitBalP = AvalableCreditLimitBalS.replace(",", "");
+		double dashboardAvalableCreditLimitBal = Double.parseDouble(AvalableCreditLimitBalP);
+		// System.out.println("dashboardAvalableCreditLimitBal " +
+		// dashboardAvalableCreditLimitBal);
+		return dashboardAvalableCreditLimitBal;
+
+	}
+
+	public static List<WebElement> listofautosuggestions(By suggestiontxt, String txt, String city_name, By d)
+			throws InterruptedException {
+
+		driver.findElement(d).sendKeys(txt);
+		driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+		List<WebElement> autosuggestions = driver.findElements(suggestiontxt);
+		for (WebElement autosuggestion : autosuggestions) {
+			System.out.println("Auto sugenValu" + autosuggestion.getText());
+			if (autosuggestion.getText().equalsIgnoreCase(city_name)) {
+				System.out.println("equal");
+				autosuggestion.click();
+				break;
+			} else {
+				System.out.println("not equal");
+			}
+		}
+
+		return autosuggestions;
+	}
+	
+	
+
+	public static void impliwait(int time) {
+		driver.manage().timeouts().implicitlyWait(time, TimeUnit.SECONDS);
+	}
+
+	public static void userLogin() {
+
+		String Company = properties.getProperty("company_code_Name");
+		String Username = properties.getProperty("usernames");
+		String Password = properties.getProperty("passwords");
+		try {
+			getWebElement("company_code").sendKeys(Company);
+			getWebElement("username").sendKeys(Username);
+			getWebElement("password").sendKeys(Password);
+			getWebElement("loginbutton").click();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("If any error occurs while logging in" + e);
+		}
+	}
+
+	// Calendar
+
+	public static void Calender1(By monthAndYearHeadar, By CalenderPicker, By nextbutton, By Selectiondate,
+			String Travelldate, By calender) throws InterruptedException {
+		driver.findElement(CalenderPicker).click();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		boolean count = false;
+		String Departuredate[] = Travelldate.split("/");
+		String monthname = Departuredate[0];
+		String year = Departuredate[1];
+		String date = Departuredate[2];
+		System.out.println(monthname + "" + year + "" + date);
+		for (int i = 0; i <= 12; i++) {
+			WebElement monthAndYearHeader = driver.findElement(monthAndYearHeadar);
+			String InterfacemonthyearHeader = monthAndYearHeader.getText();
+			String interfacemonthyearHeader[] = InterfacemonthyearHeader.split(" ");
+			System.out.println(InterfacemonthyearHeader);
+
+			if (monthname.trim().equalsIgnoreCase(interfacemonthyearHeader[0])) {
+				if (year.trim().equals(interfacemonthyearHeader[1])) {
+					System.out.println("equal");
+					List<WebElement> dates = driver.findElements(Selectiondate);
+					for (int j = 0; j < dates.size(); j++) {
+						if (dates.get(j).getText().matches(date)) {
+							dates.get(j).click();
+							count = true;
+							i = 12;
+							break;
+						}
+					}
+				}
+			} else {
+				System.out.println("Not Equal");
+				driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+				WebElement Nextbutton = driver.findElement(nextbutton);
+				Thread.sleep(2000);
+				Nextbutton.click();
+				System.out.println("Clicked On Next");
+			}
+		}
+	}
+
+	public static void selectValue(String value, WebElement element) {
+		Select se = new Select(element);
+		se.selectByVisibleText(value);
+	}
+
+	public static void Select(String Element, String Value) throws Exception {
+		WebElement set = getWebElement(Element);
+		Select sel = new Select(set);
+		sel.selectByValue(Value);
+	}
+
+	public static void SelectByIndex(String Element, int index) throws Exception {
+
+		WebElement set = getWebElement(Element);
+		Select sel = new Select(set);
+		sel.selectByIndex(index);
+	}
+
+	public static void selectByVisibleTxt1(String Element, String Value) throws Exception {
+
+		WebElement set = getWebElement(Element);
+		Select sel = new Select(set);
+		sel.selectByValue(Value);
+	}
+
+	public static void selectByVisibleTxt(String Element, String Value) throws Exception {
+
+		WebElement set = getWebElement(Element);
+		Select sel = new Select(set);
+		// sel.selectByVisi(Value);
+		sel.selectByVisibleText(Value);
+	}
+	public static void CompareFareValue(String ActualValue, String ExpectedValue, String Msg) throws Exception {
+
+		softassert.assertEquals(ActualValue, ExpectedValue, Msg);
+		if(ActualValue.equalsIgnoreCase(ExpectedValue))
+		{
+		test.log(Status.PASS, "Verification Passed for value of " + Msg);
+		}
+
+		else
+		{	
+		test.log(Status.FAIL, "Verification Failed for value of " + Msg);
+		throw new Exception("Verification Failed for value of " + Msg);
+		}
+		}
+	
+	public static void selectDate(String date_value, String dayloc, String monloc, String yrloc) throws Exception {
+		String[] date = date_value.split(",");
+		String day = date[0];
+		String month = date[1];
+		String year = date[2];
+
+	
+		Select selectDay = new Select(getWebElement(dayloc));
+		selectDay.selectByVisibleText(day);
+
+		Select selectMon = new Select(getWebElement(monloc));
+		selectMon.selectByVisibleText(month);
+
+		
+		Select selectMYr = new Select(getWebElement(yrloc));
+		selectMYr.selectByVisibleText(year);
+
+		
+	}
+
+	public static void selectPaymentExpDate(String date_value, String monloc, String yrloc) throws Exception {
+		String[] date = date_value.split(",");
+
+		String month = date[0];
+		String year = date[1];
+
+		Select selectMon = new Select(getWebElement(monloc));
+		selectMon.selectByVisibleText(month);
+
+
+		Select selectMYr = new Select(getWebElement(yrloc));
+		selectMYr.selectByVisibleText(year);
+
+	
+
+	}
+
+	// fill Checkout details.
+
+	public static void AdultData(String adultVal, String AdtTitle, String adultName, String Adult_Last_Name,
+			String AdtDate, String AdtMonth, String AdtYear, String Adult_Passport, String AdtExpDate,
+			String AdtExpMonth, String AdtExpYear, int country) throws Exception {
+
+		int adtVal = (int) Double.parseDouble(adultVal);
+
+		for (int i = 1; i < adtVal; i++) {
+
+			WebElement element = getWebElement("Title" + (i));
+
+			String adt[] = AdtTitle.split(",");
+
+			Select s = new Select(element);
+
+			s.selectByVisibleText(adt[i - 1]);
+
+			WebElement AdtFirstelements = getWebElement("Checkout_AdultFirstName" + (i + 1));
+
+			String adultFirstName[] = adultName.split(",");
+
+			AdtFirstelements.sendKeys(adultFirstName[i - 1]);
+
+			WebElement AdtLastName = getWebElement("Checkout_AdultLastName" + (i + 1));
+
+			String AdultLastName[] = Adult_Last_Name.split(",");
+
+			AdtLastName.sendKeys(AdultLastName[i - 1]);
+
+			WebElement AdtDateelements = getWebElement("Date" + (i));
+
+			String Adtdates[] = AdtDate.split(",");
+
+			Select s1 = new Select(AdtDateelements);
+
+			s1.selectByValue(Adtdates[i - 1]);
+
+			WebElement AdtMonthElements = getWebElement("Month" + (i));
+
+			String AdtMonths[] = AdtMonth.split(",");
+
+			Select s2 = new Select(AdtMonthElements);
+
+			s2.selectByValue(AdtMonths[i - 1]);
+
+			WebElement AdtYearElements = getWebElement("Year" + (i));
+
+			String AdtYears[] = AdtYear.split(",");
+
+			Select s4 = new Select(AdtYearElements);
+
+			s4.selectByValue(AdtYears[i - 1]);
+
+			// Passport value
+			if (country == 1) {
+
+				WebElement AdtPassports = getWebElement("PassportValue" + (i + 1));
+
+				String AdultPassport[] = Adult_Passport.split(",");
+
+				AdtPassports.sendKeys(AdultPassport[i - 1]);
+
+				WebElement AdtExpDat = getWebElement("Expiry_Date" + (i));
+
+				String AdtExpDates[] = AdtExpDate.split(",");
+
+				Select s7 = new Select(AdtExpDat);
+
+				s7.selectByValue(AdtExpDates[i - 1]);
+
+				WebElement AdtExpMon = getWebElement("Expiry_Month" + (i));
+
+				String AdtExpMonths[] = AdtExpMonth.split(",");
+
+				Select s8 = new Select(AdtExpMon);
+
+				s8.selectByValue(AdtExpMonths[i - 1]);
+
+				WebElement AdtExpYea = getWebElement("Expiry_Year" + (i));
+
+				String AdtExpYears[] = AdtExpYear.split(",");
+
+				Select s9 = new Select(AdtExpYea);
+
+				s9.selectByValue(AdtExpYears[i - 1]);
+
+			}
+		}
+	}
+
+	// ** This method is used to Multiple Childs ****
+
+	public static void ChdData(String Child, String ChdTitle, String Chd_First_Name, String Chd_Last_Name,
+			String ChdDate, String ChdMonth, String ChdYear, String Chd_Passport, String ChdExpDate, String ChdExpMonth,
+			String ChdExpYear, int country) throws Exception {
+
+		int adtVal = (int) Double.parseDouble(Child);
+
+		for (int i = 0; i < adtVal; i++) {
+
+			WebElement element = getWebElement("Child_Title" + (i));
+
+			String adt[] = ChdTitle.split(",");
+
+			Select s = new Select(element);
+
+			s.selectByVisibleText(adt[i]);
+
+			WebElement AdtFirstelements = getWebElement("Checkout_Child_First_Name" + (i + 1));
+
+			String adultFirstName[] = Chd_First_Name.split(",");
+
+			AdtFirstelements.sendKeys(adultFirstName[i]);
+
+			WebElement AdtLastName = getWebElement("Checkout_Child_Last_name" + (i + 1));
+
+			String AdultLastName[] = Chd_Last_Name.split(",");
+
+			AdtLastName.sendKeys(AdultLastName[i]);
+
+			WebElement AdtDateelements = getWebElement("Checkout_Child_Date" + (i));
+
+			String Adtdates[] = ChdDate.split(",");
+
+			Select s1 = new Select(AdtDateelements);
+
+			s1.selectByValue(Adtdates[i]);
+
+			WebElement AdtMonthElements = getWebElement("Checkout_Child_Month" + (i));
+
+			String AdtMonths[] = ChdMonth.split(",");
+
+			Select s2 = new Select(AdtMonthElements);
+
+			s2.selectByVisibleText(AdtMonths[i]);
+
+			WebElement AdtYearElements = getWebElement("Checkout_Child_Year" + (i));
+
+			String AdtYears[] = ChdYear.split(",");
+
+			Select s4 = new Select(AdtYearElements);
+
+			s4.selectByValue(AdtYears[i]);
+
+			// Passport value Child
+			if (country == 1) {
+
+				WebElement AdtPassports = getWebElement("Checkout_Child_Passport" + (i + 1));
+
+				String AdultPassport[] = Chd_Passport.split(",");
+
+				AdtPassports.sendKeys(AdultPassport[i]);
+				//
+
+				WebElement AdtExpDat = getWebElement("Checkout_Child_Exp_Date" + (i));
+
+				String AdtExpDates[] = ChdExpDate.split(",");
+
+				Select s7 = new Select(AdtExpDat);
+
+				s7.selectByValue(AdtExpDates[i]);
+				// s7.deselectByVisibleText(AdtExpDates[i]);
+
+				WebElement AdtExpMon = getWebElement("Checkout_Child_Exp_Month" + (i));
+
+				String AdtExpMonths[] = ChdExpMonth.split(",");
+
+				Select s8 = new Select(AdtExpMon);
+
+				s8.selectByVisibleText(AdtExpMonths[i]);
+				// s8.deselectByVisibleText(AdtExpMonths[i]);
+
+				WebElement AdtExpYea = getWebElement("Checkout_Child_Exp_Year" + (i));
+
+				String AdtExpYears[] = ChdExpYear.split(",");
+
+				Select s9 = new Select(AdtExpYea);
+
+				s9.selectByVisibleText(AdtExpYears[i]);
+
+				// s9.selectByVisibleText(AdtExpYears[i]);
+			}
+		}
+	}
+
+	// ** This method is used to Multiple Infants ****
+
+	public static void InfData(String Infants, String InfTitle, String Inf_First_Name, String Inf_Last_Name,
+			String InfDate, String InfMonth, String InfYear, String InfTravelWith, String Inf_Passport,
+			String InfExpDate, String InfExpMonth, String InfExpYear, int country) throws Exception {
+
+		int adtVal = (int) Double.parseDouble(Infants);
+
+		for (int i = 0; i < adtVal; i++) {
+
+			WebElement element = getWebElement("Infant_Title" + (i));
+
+			String adt[] = InfTitle.split(",");
+
+			Select s = new Select(element);
+
+			s.selectByVisibleText(adt[i]);
+
+			WebElement AdtFirstelements = getWebElement("Infant_First_Name" + (i + 1));
+
+			String adultFirstName[] = Inf_First_Name.split(",");
+
+			AdtFirstelements.sendKeys(adultFirstName[i]);
+
+			WebElement AdtLastName = getWebElement("Infant_Last_Name" + (i + 1));
+
+			String AdultLastName[] = Inf_Last_Name.split(",");
+
+			AdtLastName.sendKeys(AdultLastName[i]);
+
+			WebElement AdtDateelements = getWebElement("Infant_Date" + (i));
+
+			String Adtdates[] = InfDate.split(",");
+
+			Select s1 = new Select(AdtDateelements);
+
+			s1.selectByVisibleText(Adtdates[i]);
+			// s1.selectByValue(Adtdates[i]);
+
+			WebElement AdtMonthElements = getWebElement("Infant_Month" + (i));
+
+			String AdtMonths[] = InfMonth.split(",");
+
+			Select s2 = new Select(AdtMonthElements);
+
+			s2.selectByVisibleText(AdtMonths[i]);
+
+			WebElement AdtYearElements = getWebElement("Infant_Year" + (i));
+
+			String AdtYears[] = InfYear.split(",");
+
+			Select s4 = new Select(AdtYearElements);
+
+			s4.selectByVisibleText(AdtYears[i]);
+
+			WebElement InfTravelWiths = getWebElement("Travell_with" + (i));
+
+			String InfTrav[] = InfTravelWith.split(",");
+
+			Select s5 = new Select(InfTravelWiths);
+			//
+			s5.selectByVisibleText(InfTrav[i]);
+
+			// Passport value for infant
+			if (country == 1) {
+
+				WebElement AdtPassports = getWebElement("Infant_Passport" + (i + 1));
+
+				String AdultPassport[] = Inf_Passport.split(",");
+
+				AdtPassports.sendKeys(AdultPassport[i]);
+				//
+				WebElement AdtExpDat = getWebElement("Infant_Ex_Date" + (i));
+
+				String AdtExpDates[] = InfExpDate.split(",");
+
+				Select s7 = new Select(AdtExpDat);
+
+				s7.selectByVisibleText(AdtExpDates[i]);
+
+				WebElement AdtExpMon = getWebElement("Infant_Ex_Month" + (i));
+
+				String AdtExpMonths[] = InfExpMonth.split(",");
+
+				Select s8 = new Select(AdtExpMon);
+
+				s8.selectByVisibleText(AdtExpMonths[i]);
+
+				WebElement AdtExpYea = getWebElement("Infant_Ex_Year" + (i));
+
+				String AdtExpYears[] = InfExpYear.split(",");
+				Select s9 = new Select(AdtExpYea);
+
+				s9.selectByVisibleText(AdtExpYears[i]);
+
+			}
+		}
+	}
+
+	public static String takeScreenshot(WebDriver driver, String screenShotName) throws IOException {
+		TakesScreenshot ts = (TakesScreenshot) driver;
+		File source = ts.getScreenshotAs(OutputType.FILE);
+		String dest = screenShotName + ".png";
+		File destination = new File(dest);
+	
+		//	FileUtils.copyFile(source, destination);
+
+		return dest;
+	}
+
+	//
+
+	public String rough(WebDriver driver, String screeshot) throws IOException {
+		TakesScreenshot ts = (TakesScreenshot) driver;
+		File src = ts.getScreenshotAs(OutputType.FILE);
+		String destination = screeshot + ".png";
+		File dest = new File(destination);
+		FileUtils.copyFile(src, dest);
+
+		return destination;
+	}
+	//
+
+	public static void selectCalDate(String calndElemnt, String tripdate) throws Exception {
+		TestBase.getWebElement(calndElemnt).click();
+		// String tripdate="26-7-2019";
+
+
+		String[] tripDateA = tripdate.split("-");
+
+		int tripDay = Integer.parseInt(tripDateA[0]);
+	
+
+		int tripMon = Integer.parseInt(tripDateA[1]);
+		
+
+		int tripYear = Integer.parseInt(tripDateA[2]);
+	
+
+		String text = getWebElement("datevalue").getAttribute("value");
+
+		System.out.println("Data value ************* " + text);
+
+		String[] CalMonYear = text.split(" ");
+
+		String currentMon = CalMonYear[0];
+
+		int currentYear = Integer.parseInt(CalMonYear[1]);
+
+		int currentMonNum = 0;
+
+		if (currentMon.equalsIgnoreCase("Jan")) {
+			currentMonNum = 1;
+
+		} else if (currentMon.equalsIgnoreCase("Feb")) {
+			currentMonNum = 2;
+
+		} else if (currentMon.equalsIgnoreCase("Mar")) {
+			currentMonNum = 3;
+
+		} else if (currentMon.equalsIgnoreCase("Apr")) {
+			currentMonNum = 4;
+
+		} else if (currentMon.equalsIgnoreCase("May")) {
+			currentMonNum = 5;
+
+		} else if (currentMon.equalsIgnoreCase("Jun")) {
+			currentMonNum = 6;
+
+		} else if (currentMon.equalsIgnoreCase("Jul")) {
+			currentMonNum = 7;
+
+		} else if (currentMon.equalsIgnoreCase("Aug")) {
+			currentMonNum = 8;
+
+		} else if (currentMon.equalsIgnoreCase("Sep")) {
+			currentMonNum = 9;
+
+		} else if (currentMon.equalsIgnoreCase("Oct")) {
+			currentMonNum = 10;
+
+		} else if (currentMon.equalsIgnoreCase("Nov")) {
+			currentMonNum = 11;
+
+		} else if (currentMon.equalsIgnoreCase("Dec")) {
+			currentMonNum = 12;
+
+		}
+
+		for (int i = 1; i <= tripYear - currentYear; i++) {
+
+			getWebElement("yearNextButn").click();
+
+		}
+
+		for (int i = 1; i <= tripMon - currentMonNum; i++) {
+
+			getWebElement("NextMonth").click();
+		}
+
+		driver.findElement(By.xpath("//input[contains(@title,'" + tripDay + "')]")).click();
+
+	}
+
+	public static void PreferedAirline(String preairline, String airlines, String searchairline) throws Exception {
+
+		getWebElement(preairline).click();
+		String[] airlinearr = airlines.split(",");
+		for (int i = 0; i < airlinearr.length; i++) {
+			String currentairline = airlinearr[i].toLowerCase();
+			getWebElement(searchairline).sendKeys(currentairline);
+			String check = "//ul[@class='ui-multiselect-checkboxes ui-helper-reset']/li/label/span";
+			List<WebElement> elements = driver.findElements(By.xpath(check));
+			for (WebElement webelement : elements) {
+				if (webelement.getText().toLowerCase().equals(currentairline)) {
+					webelement.click();
+					break;
+				}
+			}
+			getWebElement(searchairline).clear();
+
+		}
+	}
+
+	public void getWindowhandles() {
+
+		List<WebElement> element = driver.findElements(By.xpath(""));
+
+		WebElement elements = (WebElement) driver.getWindowHandles();
+
+	}
+	// Explicit Wait
+		public static void explicitwaitinvisible(int time, By e) {
+			wait = new WebDriverWait(driver, time);
+			wait.until(ExpectedConditions.invisibilityOfElementLocated(e));
+
+		}
+		public static void explicitwaitvisible(int time, By e) {
+			wait = new WebDriverWait(driver, time);
+			wait.until(ExpectedConditions.visibilityOfElementLocated(e));
+
+		}
+
+}
+
+
+//4**********Utility
+//*********i)
+package Utilities;
+
+import java.io.FileInputStream;
+import java.sql.Driver;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
+
+import Base.TestBase;
+
+public class BrowserLaunch extends TestBase {
+
+	public static WebDriver browser(String browser) {
+		if (browser.equalsIgnoreCase("firefox")) {
+	System.setProperty("webdriver.firefox.marionette",System.getProperty("user.dir")+"\\src\\main\\java\\browsersdriver\\geckodriver.exe");
+			DesiredCapabilities dc = DesiredCapabilities.firefox();
+			dc.setCapability("marionette", true);
+			//driver = new FirefoxDriver();
+			driver.manage().window().maximize();
+			return driver;
+
+		} else if (browser.equalsIgnoreCase("chrome")) {
+			System.setProperty("webdriver.chrome.driver",System.getProperty("user.dir")+"\\drivers\\chromedriver.exe");
+			ChromeOptions options = new ChromeOptions();
+			DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+			capabilities.setCapability(ChromeOptions.CAPABILITY, options);
+			capabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, false);
+			capabilities.setCapability(CapabilityType.SUPPORTS_JAVASCRIPT, false);
+		
+			
+			driver= new ChromeDriver();
+			
+			
+			driver.manage().window().maximize();
+			return driver;
+			
+		} else if (browser.equalsIgnoreCase("ie")) {
+			System.setProperty("WebDriver.ie.driver",System.getProperty("user.dir")+"\\drivers\\IEDriverServer.exe");
+			driver = new InternetExplorerDriver();
+			driver.manage().window().maximize();
+			return driver;
+		}
+		
+		return null;
+	}
+		
+}
+
+//************ii)
+
+package Utilities;
+
+
+import java.io.File;
+
+import java.io.FileInputStream;
+
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+public class ExcelRead {
+
+	XSSFWorkbook wb;
+	XSSFSheet sheet;
+	public ExcelRead(String file_path) throws Exception
+	{
+		try{
+		File src = new File(file_path);
+		FileInputStream fis = new FileInputStream(src);
+		wb = new XSSFWorkbook(fis);
+		}catch(Exception e){
+		System.out.println(e.getMessage());
+		}
+	} 
+	
+	public int getrowCount(String sheetName)
+	{
+		int row = wb.getSheet(sheetName).getLastRowNum();
+		
+		return row;	
+	}
+	
+	public int getColumnCount(String sheetName)
+	{
+		sheet = wb.getSheet(sheetName);
+	    XSSFRow row = sheet.getRow(0);
+	    int colCount = row.getLastCellNum();
+	    return colCount;
+	}
+	
+	public String getData(String sheetName, int row, int column)
+	{	
+		sheet = wb.getSheet(sheetName);
+		XSSFCell cell=sheet.getRow(row).getCell(column);
+		cell.setCellType(CellType.STRING);
+		String data =cell.getStringCellValue();
+		return data;
+	}	
+	
+}
+
